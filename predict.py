@@ -18,7 +18,8 @@ def predict_single():
     Predict and show color image from input image
     :return: None
     """
-    img = Image.open('fruits.jpeg')
+    path = 'outputs/gray/img-8-epoch-29.jpg'
+    img = Image.open(path)
     img = img.resize((224,224))
     img_original = np.array(img)
 
@@ -38,8 +39,27 @@ def predict_single():
     color_image[:, :, 1:3] = color_image[:, :, 1:3] * 255 - 128
     color_image = lab2rgb(color_image.astype(np.float16))
 
-    plt.imshow(color_image.astype('float'), interpolation='nearest')
-    plt.show()
+    color_image_bgr = color_image.astype(np.float32)
+    color_image_bgr = cv2.cvtColor(color_image_bgr, cv2.COLOR_RGB2BGR)
+    color_image_bgr = cv2.resize(color_image_bgr, (380, 240))
+
+    normalized_array = (color_image_bgr - np.min(color_image_bgr)) / (
+            np.max(color_image_bgr) - np.min(color_image_bgr))  # this set the range from 0 till 1
+    color_image_bgr = (normalized_array * 255).astype(np.uint8)
+    gray = cv2.resize(gray, (380, 240))
+    gray = np.stack((gray,) * 3, axis=-1)
+
+    gray = (gray - np.min(gray)) / (
+            np.max(gray) - np.min(gray))  # this set the range from 0 till 1
+    gray = (gray * 255).astype(np.uint8)
+    vis = np.concatenate((gray, color_image_bgr), axis=1)
+
+    frame_normed = np.array(vis, np.uint8)
+
+    cv2.imwrite(path[:-4]+"out.jpg", frame_normed)
+    cv2.imshow("out", frame_normed)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
 
 def predict_video():
@@ -104,4 +124,5 @@ def predict_video():
 
 
 if __name__ == "__main__":
-    predict_video()
+    predict_single()
+    #predict_video()
