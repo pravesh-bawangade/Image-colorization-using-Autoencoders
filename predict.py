@@ -73,7 +73,7 @@ def predict_video():
 
             output = output.detach()
             color_image = torch.cat((x[0], output[0]), 0).numpy()
-            color_image = color_image.transpose((1, 2, 0))  # rescale for matplotlib
+            color_image = color_image.transpose((1, 2, 0))
             color_image[:, :, 0:1] = color_image[:, :, 0:1] * 100
             color_image[:, :, 1:3] = color_image[:, :, 1:3] * 255 - 128
             color_image = lab2rgb(color_image.astype(np.float16))
