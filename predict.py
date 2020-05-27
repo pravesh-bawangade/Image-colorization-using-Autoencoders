@@ -1,14 +1,23 @@
+"""
+Author: Pravesh Bawangade
+File Name: predict.py
+
+"""
 from PIL import Image
 from matplotlib import pyplot as plt
 import torchvision.transforms.functional as TF
 import numpy as np
 import torch
-from skimage.color import lab2rgb, rgb2lab, rgb2gray
+from skimage.color import lab2rgb, rgb2gray
 from model import ColorizationUpsampling
 import cv2
 
 
 def predict_single():
+    """
+    Predict and show color image from input image
+    :return: None
+    """
     img = Image.open('fruits.jpeg')
     img = img.resize((224,224))
     img_original = np.array(img)
@@ -34,8 +43,17 @@ def predict_single():
 
 
 def predict_video():
-    cv2_im = cv2.imread('outputs/gray/img-1-epoch-18.jpg')
-    cap = cv2.VideoCapture(0)
+    """
+    Predict and show real time image colorization.
+    :return: None
+    """
+    cap = cv2.VideoCapture('input.avi')
+
+    # For recording video
+    frame_width = int(760)
+    frame_height = int(240)
+    out = cv2.VideoWriter('output.avi', cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 15, (frame_width, frame_height))
+
     while True:
         ret, cv2_im = cap.read()
         if ret:
@@ -61,11 +79,29 @@ def predict_video():
             color_image = lab2rgb(color_image.astype(np.float16))
             color_image_bgr = color_image.astype(np.float32)
             color_image_bgr = cv2.cvtColor(color_image_bgr, cv2.COLOR_RGB2BGR)
-            cv2.imshow("image", color_image_bgr)
+            color_image_bgr = cv2.resize(color_image_bgr, (380, 240))
+
+            normalized_array = (color_image_bgr - np.min(color_image_bgr)) / (
+                        np.max(color_image_bgr) - np.min(color_image_bgr))  # this set the range from 0 till 1
+            color_image_bgr = (normalized_array * 255).astype(np.uint8)
+            gray = cv2.resize(gray, (380,240))
+            gray = np.stack((gray,)*3, axis=-1)
+
+            gray = (gray - np.min(gray)) / (
+                    np.max(gray) - np.min(gray))  # this set the range from 0 till 1
+            gray = (gray * 255).astype(np.uint8)
+            vis = np.concatenate((gray, color_image_bgr), axis=1)
+
+            frame_normed = np.array(vis, np.uint8)
+
+            cv2.imshow("image", frame_normed)
+            out.write(frame_normed)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
+    out.release()
+    cap.release()
     cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
-    predict_single()
+    predict_video()

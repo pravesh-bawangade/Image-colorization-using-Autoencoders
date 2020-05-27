@@ -1,11 +1,16 @@
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+"""
+Author: Pravesh Bawangade
+File Name: model.py
 
+"""
+import torch.nn as nn
 import torchvision.models as models
 
 
 class ColorizationUpsampling(nn.Module):
+    """
+    Autoencoder architecture.
+    """
     def __init__(self, input_size=128):
         super(ColorizationUpsampling, self).__init__()
         MIDLEVEL_FEATURE_SIZE = 128
