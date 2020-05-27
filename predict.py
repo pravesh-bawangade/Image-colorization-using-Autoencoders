@@ -9,7 +9,7 @@ import cv2
 
 
 def predict_single():
-    img = Image.open('outputs/gray/img-0-epoch-18.jpg')
+    img = Image.open('fruits.jpeg')
     img = img.resize((224,224))
     img_original = np.array(img)
 
@@ -68,4 +68,4 @@ def predict_video():
 
 
 if __name__ == "__main__":
-    predict_video()
+    predict_single()
